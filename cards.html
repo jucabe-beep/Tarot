@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrology Club - Selección de Cartas</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        /* Estilos específicos para la pantalla de cartas */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .cards-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .cards-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .cards-subtitle {
+            font-size: 18px;
+            color: #000;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+
+
+        .random-cards-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 60px;
+            height: 448px;
+            gap: 40px;
+        }
+
+        .random-card {
+            width: 240px;
+            height: 448px;
+            cursor: pointer;
+            perspective: 1000px;
+            position: relative;
+            transition: transform 0.1s ease-out;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .random-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-back-face {
+            background: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-back, .card-front-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .tarot-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .tarot-card.selected {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(0.95);
+        }
+
+        .tarot-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+
+
+
+
+        /* Estilos para la sección de interpretación */
+        .interpretation-section {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            gap: 40px;
+            animation: fadeInUp 0.8s ease-out;
+            align-items: center;
+        }
+
+
+
+        .interpretation-content-section {
+            width: 100%;
+            text-align: center;
+        }
+
+        .interpretation-header {
+            margin-bottom: 40px;
+        }
+
+        .interpretation-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: #000;
+            margin: 0 0 30px 0;
+        }
+
+        .interpretation-content {
+            margin-bottom: 40px;
+        }
+
+        .interpretation-text {
+            font-size: 20px;
+            color: #000;
+            line-height: 1.8;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .interpretation-text.second-paragraph {
+            margin-top: 20px;
+        }
+
+        .overall-reading {
+            background: linear-gradient(135deg, #4A235A, #5A1F5A);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .reading-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reading-text {
+            font-size: 18px;
+            line-height: 1.7;
+            opacity: 0.95;
+        }
+
+
+
+
+
+        /* Botón para nueva lectura */
+        .new-reading-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .new-reading-button {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .new-reading-button:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para el mensaje de confirmación */
+        .confirmation-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4A235A, #5A1F5A);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 400px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .confirmation-title {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .confirmation-text {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-button {
+            background: #F6AE28;
+            color: #4A235A;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cards-container {
+                padding: 20px;
+            }
+            
+            .cards-title {
+                font-size: 36px;
+            }
+            
+
+            
+            .random-cards-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .revealed-cards-display {
+                flex-direction: row;
+                gap: 15px;
+            }
+            
+            .revealed-card {
+                width: 150px;
+                height: 280px;
+            }
+            
+            .interpretation-section {
+                flex-direction: column;
+                gap: 30px;
+                margin: 25px 0;
+            }
+            
+            .interpretation-title {
+                font-size: 32px;
+                text-align: center;
+            }
+            
+            .divider {
+                margin: 0 auto 25px auto;
+            }
+            
+            .interpretation-text {
+                font-size: 16px;
+                text-align: center;
+            }
+            
+
+            
+            .new-reading-button {
+                padding: 16px 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Borde morado alrededor de toda la página -->
+    <div class="page-border"></div>
+    
+    <!-- Contenedor principal de cartas -->
+    <div class="cards-container">
+        <!-- Header -->
+        <div class="cards-header">
+            <h1 class="cards-title">Escoge 3 cartas</h1>
+            <p class="cards-subtitle">Selecciona las cartas que te llamen la atención para tu lectura personal</p>
+        </div>
+
+
+
+        <!-- 3 Cartas posicionadas aleatoriamente -->
+        <div class="random-cards-container">
+            <div class="random-card" id="randomCard1" data-card="0">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="images/back/Whisk_2cb508cfe6 1.jpg" alt="Carta de Tarot" class="card-back">
+                    </div>
+                    <div class="card-back-face">
+                        <img src="" alt="Carta de Tarot" class="card-front-image">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="random-card" id="randomCard2" data-card="1">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="images/back/Whisk_2cb508cfe6 1.jpg" alt="Carta de Tarot" class="card-back">
+                    </div>
+                    <div class="card-back-face">
+                        <img src="" alt="Carta de Tarot" class="card-front-image">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="random-card" id="randomCard3" data-card="2">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="images/back/Whisk_2cb508cfe6 1.jpg" alt="Carta de Tarot" class="card-back">
+                    </div>
+                    <div class="card-back-face">
+                        <img src="" alt="Carta de Tarot" class="card-front-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de interpretación (inicialmente oculta) -->
+        <div class="interpretation-section" id="interpretationSection" style="display: none;">
+            <div class="interpretation-header">
+                <h2 class="interpretation-title">Tu Lectura de Tarot</h2>
+
+            </div>
+            
+            <div class="interpretation-content">
+                <p class="interpretation-text">
+                    Las cartas que has elegido revelan un momento significativo en tu camino espiritual. 
+                    Esta combinación única sugiere que estás experimentando un período de profunda transformación 
+                    donde la intuición y la sabiduría ancestral se alinean para guiarte hacia tu verdadero propósito.
+                </p>
+                
+                <p class="interpretation-text second-paragraph">
+                    El universo está conspirando a tu favor, presentándote oportunidades que requieren 
+                    coraje y fe. Confía en los mensajes que recibes y mantén tu corazón abierto a las 
+                    sincronicidades que se manifiestan en tu vida diaria.
+                </p>
+            </div>
+            
+            <!-- Botón para hacer otra lectura -->
+            <div class="new-reading-section">
+                <button class="new-reading-button" id="newReadingBtn">
+                    🔮 Hacer Otra Lectura 🔮
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Tarjetas decorativas -->
+    <div class="decorative-cards">
+        <!-- Tarjeta naranja (top-left) -->
+        <div class="card card-orange">
+            <div class="sun-icon">☀️</div>
+        </div>
+        
+        <!-- Tarjeta crema con media luna (top-right) -->
+        <div class="card card-cream">
+            <div class="crescent-moon"></div>
+            <div class="star">⭐</div>
+        </div>
+    </div>
+
+    <!-- Estrellas decorativas -->
+    <div class="decorative-stars">
+        <div class="star-small star-purple">✦</div>
+        <div class="star-small star-purple">✦</div>
+        <div class="star-small star-teal">✦</div>
+        <div class="star-small star-teal">✦</div>
+        <div class="star-small star-orange">✦</div>
+        <div class="star-small star-orange">✦</div>
+    </div>
+
+    <script>
+        class TarotCardSelector {
+            constructor() {
+                this.selectedCards = [];
+                this.maxCards = 3;
+                this.revealedCards = 0;
+                this.cards = [
+                    'images/cartas/The Fool.png',
+                    'images/cartas/The Magician.png',
+                    'images/cartas/High Priestess.png',
+                    'images/cartas/The Empress.png',
+                    'images/cartas/The Emperor.png',
+                    'images/cartas/The Hierophant.png',
+                    'images/cartas/The Lover.png',
+                    'images/cartas/The Chariot.png',
+                    'images/cartas/Strength.png',
+                    'images/cartas/The Hermit.png',
+                    'images/cartas/Thw Wheel of Fortune.png',
+                    'images/cartas/Justice.png'
+                ];
+                
+                // Nombres de las cartas para la interpretación
+                this.cardNames = [
+                    'El Loco',
+                    'El Mago',
+                    'La Sacerdotisa',
+                    'La Emperatriz',
+                    'El Emperador',
+                    'El Hierofante',
+                    'Los Enamorados',
+                    'El Carro',
+                    'La Fuerza',
+                    'El Ermitaño',
+                    'La Rueda de la Fortuna',
+                    'La Justicia'
+                ];
+                
+                // Significados de las cartas
+                this.cardMeanings = [
+                    'Nuevos comienzos, aventura, espontaneidad y libertad. El Loco te invita a tomar riesgos y confiar en el universo.',
+                    'Manifestación, poder personal, habilidad y confianza. El Mago te recuerda que tienes todo lo necesario para crear tu realidad.',
+                    'Intuición, sabiduría interior, misterio y conocimiento oculto. La Sacerdotisa te guía a confiar en tu voz interior.',
+                    'Abundancia, fertilidad, creatividad y maternidad. La Emperatriz te anima a nutrir tus proyectos y sueños.',
+                    'Autoridad, estabilidad, liderazgo y estructura. El Emperador te da la fuerza para tomar el control de tu vida.',
+                    'Tradición, espiritualidad, educación y sabiduría. El Hierofante te conecta con el conocimiento ancestral.',
+                    'Amor, relaciones, armonía y elecciones importantes. Los Enamorados te muestran el poder de la conexión auténtica.',
+                    'Determinación, progreso, victoria y movimiento hacia adelante. El Carro te impulsa a avanzar con confianza.',
+                    'Coraje, paciencia, control y poder interior. La Fuerza te recuerda que eres más fuerte de lo que crees.',
+                    'Reflexión, soledad, búsqueda interior y sabiduría. El Ermitaño te invita a la introspección.',
+                    'Cambio, ciclos, oportunidades y giros del destino. La Rueda de la Fortuna te muestra que todo es temporal.',
+                    'Equilibrio, verdad, justicia y decisiones importantes. La Justicia te pide ser honesto contigo mismo.'
+                ];
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.shuffleCards();
+                this.assignRandomCards();
+            }
+
+            bindEvents() {
+                // Eventos para las cartas aleatorias
+                const randomCards = document.querySelectorAll('.random-card');
+                randomCards.forEach(card => {
+                    card.addEventListener('click', (e) => this.flipCard(e));
+                });
+
+                // Botón de nueva lectura
+                const newReadingBtn = document.getElementById('newReadingBtn');
+                if (newReadingBtn) {
+                    newReadingBtn.addEventListener('click', () => this.resetReading());
+                }
+
+                // Efecto parallax sutil para las cartas
+                this.initParallax();
+            }
+
+            initParallax() {
+                const cards = document.querySelectorAll('.random-card');
+                
+                cards.forEach(card => {
+                    // Solo aplicar parallax si la carta no está volteada
+                    if (card.classList.contains('flipped')) return;
+                    
+                    card.addEventListener('mousemove', (e) => {
+                        if (card.classList.contains('flipped')) return;
+                        
+                        const rect = card.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        
+                        // Calcular la distancia del mouse desde el centro de la carta
+                        const mouseX = e.clientX - centerX;
+                        const mouseY = e.clientY - centerY;
+                        
+                        // Aplicar transformación sutil (efecto visible pero elegante)
+                        const moveX = mouseX * 0.025;
+                        const moveY = mouseY * 0.025;
+                        
+                        card.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    });
+                    
+                    // Resetear la posición cuando el mouse sale de la carta
+                    card.addEventListener('mouseleave', () => {
+                        if (!card.classList.contains('flipped')) {
+                            card.style.transform = 'translate(0px, 0px)';
+                        }
+                    });
+                });
+            }
+
+            selectCard(event) {
+                const cardItem = event.currentTarget;
+                const cardIndex = cardItem.dataset.card;
+                
+                if (this.selectedCards.length >= this.maxCards) {
+                    return; // Ya se seleccionaron 3 cartas
+                }
+
+                if (cardItem.classList.contains('selected')) {
+                    return; // Carta ya seleccionada
+                }
+
+                // Agregar carta a la selección
+                this.selectedCards.push({
+                    element: cardItem,
+                    index: cardIndex,
+                    frontImage: this.cards[cardIndex]
+                });
+
+                // Marcar carta como seleccionada
+                cardItem.classList.add('selected');
+
+                // Colocar carta en el slot correspondiente
+                this.placeCardInSlot(cardIndex, cardItem);
+
+                // Verificar si se completó la selección
+                if (this.selectedCards.length === this.maxCards) {
+                    this.enableCompleteButton();
+                }
+            }
+
+            placeCardInSlot(cardIndex, cardElement) {
+                const slotIndex = this.selectedCards.length - 1;
+                const slot = document.getElementById(`slot${slotIndex + 1}`);
+                
+                if (slot) {
+                    // Limpiar placeholder
+                    slot.innerHTML = '';
+                    slot.classList.add('filled');
+                    
+                    // Crear imagen de la carta frontal
+                    const cardImage = document.createElement('img');
+                    cardImage.src = this.cards[cardIndex];
+                    cardImage.alt = `Carta ${slotIndex + 1}`;
+                    cardImage.className = 'selected-card';
+                    
+                    slot.appendChild(cardImage);
+                    
+                    // Actualizar la interpretación de esta carta
+                    this.updateCardInterpretation(slotIndex + 1, cardIndex);
+                }
+            }
+
+            enableCompleteButton() {
+                const completeBtn = document.getElementById('completeButton');
+                if (completeBtn) {
+                    completeBtn.disabled = false;
+                }
+                
+                // Mostrar la sección de interpretación
+                this.showInterpretation();
+            }
+            
+            updateCardInterpretation(slotNumber, cardIndex) {
+                const cardNameElement = document.getElementById(`card${slotNumber}Name`);
+                const cardMeaningElement = document.getElementById(`card${slotNumber}Meaning`);
+                
+                if (cardNameElement && cardMeaningElement) {
+                    cardNameElement.textContent = this.cardNames[cardIndex];
+                    cardMeaningElement.textContent = this.cardMeanings[cardIndex];
+                }
+            }
+            
+            showInterpretation() {
+                const interpretationSection = document.getElementById('interpretationSection');
+                
+                if (interpretationSection) {
+                    interpretationSection.style.display = 'block';
+                    
+                    // NO ocultar el random-cards-container - se mantiene visible
+                    // Las cartas volteadas permanecen en su lugar original
+                    
+                    // Hacer scroll suave hacia la interpretación
+                    interpretationSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }
+            
+            flipCard(event) {
+                const card = event.currentTarget;
+                const cardIndex = parseInt(card.dataset.card);
+                
+                // Verificar si la carta ya fue volteada
+                if (card.classList.contains('flipped')) {
+                    return;
+                }
+                
+                // Verificar si la imagen frontal existe
+                const frontImage = this.cards[cardIndex];
+                if (!frontImage) {
+                    return; // No voltear si no hay imagen
+                }
+                
+                // Voltear la carta
+                card.classList.add('flipped');
+                
+                // Resetear la posición parallax cuando se voltea
+                card.style.transform = 'translate(0px, 0px)';
+                
+                // Establecer la imagen frontal
+                const frontImageElement = card.querySelector('.card-front-image');
+                if (frontImageElement) {
+                    frontImageElement.src = frontImage;
+                }
+                
+                // Agregar carta a la selección
+                this.selectedCards.push({
+                    element: card,
+                    index: cardIndex,
+                    frontImage: frontImage
+                });
+                
+                this.revealedCards++;
+                
+                // Verificar si se revelaron todas las cartas
+                if (this.revealedCards === this.maxCards) {
+                    setTimeout(() => {
+                        this.showInterpretation();
+                    }, 1000); // Esperar 1 segundo para que se vea la última carta volteada
+                }
+            }
+            
+            assignRandomCards() {
+                // Seleccionar 3 cartas aleatorias del mazo
+                const shuffledCards = [...this.cards];
+                const selectedIndices = [];
+                
+                // Seleccionar 3 índices únicos aleatorios
+                while (selectedIndices.length < 3) {
+                    const randomIndex = Math.floor(Math.random() * shuffledCards.length);
+                    if (!selectedIndices.includes(randomIndex)) {
+                        selectedIndices.push(randomIndex);
+                    }
+                }
+                
+                // Asignar las cartas seleccionadas a las 3 cartas aleatorias
+                const randomCards = document.querySelectorAll('.random-card');
+                randomCards.forEach((card, index) => {
+                    const cardIndex = selectedIndices[index];
+                    card.dataset.card = cardIndex;
+                });
+            }
+            
+
+            
+            resetReading() {
+                // Ocultar la sección de interpretación
+                const interpretationSection = document.getElementById('interpretationSection');
+                if (interpretationSection) {
+                    interpretationSection.style.display = 'none';
+                }
+                
+                // El random-cards-container siempre está visible, no necesita ser mostrado
+                
+                // Resetear la selección
+                this.selectedCards = [];
+                this.revealedCards = 0;
+                
+                // Remover clase flipped de todas las cartas y resetear posiciones parallax
+                const randomCards = document.querySelectorAll('.random-card');
+                randomCards.forEach(card => {
+                    card.classList.remove('flipped');
+                    card.style.transform = 'translate(0px, 0px)';
+                });
+                
+                // Mezclar las cartas nuevamente
+                this.shuffleCards();
+                
+                // Asignar nuevas cartas aleatorias
+                this.assignRandomCards();
+                
+                // Hacer scroll hacia arriba
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            onSelectionComplete() {
+                // Mostrar mensaje de selección completa
+                setTimeout(() => {
+                                    // Crear un mensaje más elegante usando clases CSS
+                const message = document.createElement('div');
+                message.innerHTML = `
+                    <div class="confirmation-message">
+                        <h3 class="confirmation-title">✨ ¡Lectura Completa! ✨</h3>
+                        <p class="confirmation-text">
+                            Has seleccionado tus 3 cartas del destino. 
+                            La interpretación aparece más abajo con todos los detalles de tu lectura personal.
+                        </p>
+                        <button class="confirmation-button" onclick="this.parentElement.remove()">Entendido</button>
+                    </div>
+                `;
+                document.body.appendChild(message);
+                }, 500);
+            }
+
+            shuffleCards() {
+                // Mezclar el orden de las cartas
+                for (let i = this.cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+                }
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            new TarotCardSelector();
+        });
+    </script>
+</body>
+</html>
